@@ -4144,8 +4144,43 @@ int mail_criteria_string (STRINGLIST **s,char **r)
   case ' ':
     return NIL;
   case '"':			/* quoted string */
-    if (strchr (c+1,'"')) end = "\"";
-    else return NIL;		/* falls through */
+    if ( !strchr (c,'\\') ) {    /* simple case, no escape chars inside */
+      if (strchr (c+1,'"')) end = "\"";
+      else return NIL;           /* falls through */
+    } else {                     /* we need to strip escape char cos it will be passed as literal */
+ // [DG]: new code allow embedded quotes striping escape char "\"
+      char *pstr;
+      int fflag = 0;
+      char tmp[MAILTMPLEN];
+      pstr = c;                  /* first char of string */
+      n = 0;
+      while ( *pstr && n < MAILTMPLEN ) {
+
+        pstr++;
+
+        if ( *pstr == '\\' && !fflag ) { /* escaping char */
+          fflag = 1;
+          continue;
+        }
+
+        tmp[n] = *pstr;
+
+        if ( *pstr  == '"' && !fflag ) {
+          fflag = 2;                  /* end of string reached, job done */
+          tmp[n] = '\0';              /* strip final quote */
+          strtok_r (pstr," ",r);      /* reset for next token */
+          d = tmp;
+          break;
+        }
+        fflag = 0;
+        n++;
+     }
+
+     if ( fflag != 2 ) return NIL;      /* no final quote or string is too long for buffer */
+     break;
+ // new code
+  }
+
   default:			/* atomic string */
     if (d = strtok_r (c,end,r)) n = strlen (d);
     else return NIL;
