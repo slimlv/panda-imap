@@ -4387,7 +4387,7 @@ SORTCACHE **mail_sort_loadcache (MAILSTREAM *stream,SORTPGM *pgm)
 	}
 	break;
 
-      case SORTFROM:		/* sort by first from */
+      case SORTFROM: case SORTDISPLAYFROM:	/* sort by first from */
 	if (!s->from) {
 	  if (env) s->from = env->from && env->from->mailbox ?
 	    cpystr (env->from->mailbox) : NIL;
@@ -4674,6 +4674,9 @@ int mail_sort_compare (const void *a1,const void *a2)
       break;
     case SORTFROM:		/* sort by first from */
       i = compare_string (s1->from,s2->from);
+      break;
+    case SORTDISPLAYFROM:              /* sort by first from */
+      i = compare_cstring (s1->from,s2->from);
       break;
     case SORTTO:		/* sort by first to */
       i = compare_string (s1->to,s2->to);

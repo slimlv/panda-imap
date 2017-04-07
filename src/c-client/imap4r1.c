@@ -2196,7 +2196,7 @@ unsigned long *imap_sort (MAILSTREAM *stream,char *charset,SEARCHPGM *spg,
     long ftflags = 0;
 				/* see if need envelopes */
     for (sp = pgm; sp && !ftflags; sp = sp->next) switch (sp->function) {
-    case SORTDATE: case SORTFROM: case SORTSUBJECT: case SORTTO: case SORTCC:
+    case SORTDATE: case SORTFROM: case SORTDISPLAYFROM: case SORTSUBJECT: case SORTTO: case SORTCC:
       ftflags = FT_NEEDENV + ((flags & SE_NOHDRS) ? FT_NOHDRS : NIL);
     }
     if (spg) {			/* only if a search needs to be done */
@@ -3026,6 +3026,9 @@ IMAPPARSEDREPLY *imap_send (MAILSTREAM *stream,char *cmd,IMAPARG *args[])
 	case SORTFROM:
 	  for (t = "FROM"; *t; *s++ = *t++);
 	  break;
+       case SORTDISPLAYFROM:
+         for (t = "DISPLAYFROM"; *t; *s++ = *t++);
+         break;
 	case SORTSUBJECT:
 	  for (t = "SUBJECT"; *t; *s++ = *t++);
 	  break;

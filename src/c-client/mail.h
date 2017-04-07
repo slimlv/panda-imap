@@ -582,6 +582,7 @@
 #define SORTTO 4		/* to */
 #define SORTCC 5		/* cc */
 #define SORTSIZE 6		/* size */
+#define SORTDISPLAYFROM 7	/* DISPLAYFROM */
 
 
 /* imapreferral_t codes */
