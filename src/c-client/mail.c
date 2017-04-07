@@ -4009,6 +4009,19 @@ SEARCHPGM *mail_criteria (char *criteria)
       case 'D':			/* possible DELETED */
 	if (!strcmp (criterion+1,"ELETED")) f = pgm->deleted = T;
 	break;
+    case 'H':          /* possible HEADER */
+    //char* header_name, header_value;
+    if (!strcmp (criterion+1,"EADER")) {
+      char* header_name = strtok_r (NIL," ",&r);
+      char* header_value = strtok_r (NIL," ",&r);
+
+      if(header_name && header_value) {
+        pgm->header = mail_newsearchheader (header_name,header_value);
+        //pgm->header->next = mail_newsearchheader();
+        f = T; /* success */
+      }
+    }
+    break;
       case 'F':			/* possible FLAGGED, FROM */
 	if (!strcmp (criterion+1,"LAGGED")) f = pgm->flagged = T;
 	else if (!strcmp (criterion+1,"ROM"))
