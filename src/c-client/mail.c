@@ -3257,6 +3257,10 @@ long mail_uid_sequence (MAILSTREAM *stream,unsigned char *sequence)
 {
   unsigned long i,j,k,x,y;
   for (i = 1; i <= stream->nmsgs; i++) mail_elt (stream,i)->sequence = NIL;
+  
+  //MR: this issues sequence lookup mseq and fills cache
+  imap_msgnos (stream, sequence);
+
   while (sequence && *sequence){/* while there is something to parse */
     if (*sequence == '*') {	/* maximum message */
       i = stream->nmsgs ? mail_uid (stream,stream->nmsgs) : stream->uid_last;

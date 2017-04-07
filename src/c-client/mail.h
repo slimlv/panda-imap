@@ -1477,6 +1477,8 @@ DRIVER {
   unsigned long (*uid) (MAILSTREAM *stream,unsigned long msgno);
 				/* return message number from UID */
   unsigned long (*msgno) (MAILSTREAM *stream,unsigned long uid);
+                               /* fill cache from UID list */
+  void (*msgnos) (MAILSTREAM *stream, unsigned char *sequence);
 				/* modify flags */
   void (*flag) (MAILSTREAM *stream,char *sequence,char *flag,long flags);
 				/* per-message modify flags */

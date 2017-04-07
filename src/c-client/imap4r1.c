@@ -178,6 +178,7 @@ long imap_msgdata (MAILSTREAM *stream,unsigned long msgno,char *section,
 		   long flags);
 unsigned long imap_uid (MAILSTREAM *stream,unsigned long msgno);
 unsigned long imap_msgno (MAILSTREAM *stream,unsigned long uid);
+void imap_msgnos (MAILSTREAM *stream, unsigned char *uids);
 void imap_flag (MAILSTREAM *stream,char *sequence,char *flag,long flags);
 long imap_search (MAILSTREAM *stream,char *charset,SEARCHPGM *pgm,long flags);
 unsigned long *imap_sort (MAILSTREAM *stream,char *charset,SEARCHPGM *spg,
@@ -292,6 +293,7 @@ DRIVER imapdriver = {
   imap_msgdata,			/* fetch partial message */
   imap_uid,			/* unique identifier */
   imap_msgno,			/* message number */
+  imap_msgnos,                 /* message numbers */
   imap_flag,			/* modify flags */
   NIL,				/* per-message modify flags */
   imap_search,			/* search for message based on criteria */
@@ -2356,6 +2358,48 @@ long imap_ping (MAILSTREAM *stream)
   return (LOCAL->netstream &&	/* send "NOOP" */
 	  imap_OK (stream,imap_send (stream,"NOOP",NIL))) ? T : NIL;
 }
+
+/*
+* MR: this is dummy function just to fill cache
+* does not care what it returns, if result is good, then cache will be filled
+* uids delimiter is ','
+*/
+void imap_msgnos (MAILSTREAM *stream, unsigned char *uids)
+{
+  IMAPPARSEDREPLY *reply;
+  IMAPARG *args[3],aseq,aatt;
+  char seq[MAILTMPLEN];
+  char *p, *dp;
+  int i,j;
+
+  aseq.type = SEQUENCE; aseq.text = (void *) seq;
+  aatt.type = ATOM; aatt.text = (void *) "UID";
+  args[0] = &aseq; args[1] = &aatt; args[2] = NIL;
+
+  p = uids; // pointer to move
+  dp = uids; // pointer to latest delimiter fit in buffer
+
+  /* loop until end */
+  while (*p) {
+    for ( i = 0; i < MAILTMPLEN; i++) {
+      seq[i] = *p;
+      if ( seq[i] == ',') { dp = p; j = i; }
+      if ( seq[i] == '\0' ) { 
+        if (!imap_OK (stream,reply = imap_send (stream,"UID FETCH",args))) mm_log (reply->text,ERROR);
+        return;
+      }
+      p++;
+    }
+
+    seq[j] = '\0';
+    p = dp+1;
+
+    /* send "UID FETCH uid UID" */
+    if (!imap_OK (stream,reply = imap_send (stream,"UID FETCH",args))) mm_log (reply->text,ERROR);
+  }
+
+}
+
 
 
 /* IMAP check mailbox
